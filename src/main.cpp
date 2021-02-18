@@ -153,8 +153,8 @@ static ID2D1Bitmap* createBitmap(const String& imageData, int clientWidth, int c
 static D2D1_RECT_F centerImage(float width, float height) {
     RECT clientRect;
     GetClientRect(hwnd, &clientRect);
-    float clientWidth = clientRect.right - clientRect.left;
-    float clientHeight = clientRect.bottom - clientRect.top;
+    float clientWidth  = static_cast<float>(clientRect.right - clientRect.left);
+    float clientHeight = static_cast<float>(clientRect.bottom - clientRect.top);
 
     float scaleX = clientWidth / width;
     float scaleY = clientHeight / height;
