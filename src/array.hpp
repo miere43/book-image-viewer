@@ -18,10 +18,10 @@ struct Array {
         return data[index];
     }
 
-	void pop() {
-		verify(count > 0);
-		--count;
-	}
+    void pop() {
+        verify(count > 0);
+        --count;
+    }
 
     T& last() {
         verify(count > 0);

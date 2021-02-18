@@ -37,7 +37,7 @@ static LRESULT __stdcall windowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
 
 int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t* lpCmdLine, int nCmdShow) {
     initCom();
-	initWindow(hInstance);
+    initWindow(hInstance);
 
     MSG msg;
     while (GetMessageW(&msg, 0, 0, 0)) {
@@ -45,7 +45,7 @@ int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, wchar_t* lp
         DispatchMessageW(&msg);
     }
 
-	return 0;
+    return 0;
 }
 
 static void initCom() {

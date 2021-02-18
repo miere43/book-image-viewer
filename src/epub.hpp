@@ -4,21 +4,21 @@
 #include "array.hpp"
 
 struct EPubItem {
-	String id;
-	String href;
-	String mediaType;
+    String id;
+    String href;
+    String mediaType;
 };
 
 struct EPub {
-	String fileName;
-	String contentRootFolder;
-	Array<EPubItem*> items;
-	Array<EPubItem*> linearItemOrder;
-	Array<String> images;
-	mz_zip_archive zip;
+    String fileName;
+    String contentRootFolder;
+    Array<EPubItem*> items;
+    Array<EPubItem*> linearItemOrder;
+    Array<String> images;
+    mz_zip_archive zip;
 
-	EPubItem* getItemById(const String& id);
-	void parse(const String& fileName);
-	String readFile(const String& fileName);
-	void destroy();
+    EPubItem* getItemById(const String& id);
+    void parse(const String& fileName);
+    String readFile(const String& fileName);
+    void destroy();
 };
