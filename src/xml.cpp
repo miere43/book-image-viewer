@@ -385,6 +385,31 @@ void XmlElement::getElementsByTagName(const String& name, Array<XmlElement*>& re
     }
 }
 
+Array<XmlElement*> XmlElement::getElementsByTagNames(const String* names, size_t count) {
+    Array<XmlElement*> results;
+    getElementsByTagNames(names, count, results);
+    return results;
+}
+
+void XmlElement::getElementsByTagNames(const String* names, size_t count, Array<XmlElement*>& result) {
+    for (auto child : children) {
+        if (child->type != XmlNodeType::Element) {
+            continue;
+        }
+        auto* element = (XmlElement*)child;
+
+        for (size_t i = 0; i < count; ++i) {
+            const auto& name = names[i];
+            if (stringEqualsCaseInsensitive(element->name, name)) {
+                result.push(element);
+                break;
+            }
+        }
+
+        element->getElementsByTagNames(names, count, result);
+    }
+}
+
 bool XmlElement::attrBoolean(const String& key) const {
     return parseBoolean(attr(key));
 }

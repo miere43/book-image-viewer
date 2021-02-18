@@ -7,14 +7,14 @@
 
 static String removeLastPathComponent(const String& path) {
     int slashIndex = lastIndexOf(path, '/');
-    return slashIndex == -1 ? path : substring(path, 0, slashIndex);
+    return slashIndex == -1 ? copyString("") : substring(path, 0, slashIndex);
 }
 
 static void splitPathIntoComponents(const String& path, Array<String>& components) {
     int lastComponentEndIndex = 0;
     for (int i = 0; i <= path.count; ++i) {
-        char c = path[i];
-        if (c == '/' || i == path.count) {
+        char c = i < path.count ? path[i] : '/';
+        if (c == '/') {
             int componentCharacterCount = i - lastComponentEndIndex;
             if (componentCharacterCount > 0) {
                 components.push(substring(path, lastComponentEndIndex, componentCharacterCount));
@@ -99,14 +99,26 @@ static void collectImage(EPub& epub, const String& src) {
 
 static void collectPageImages(EPub& epub, const String& content, const String& currentDirectory) {
     auto root = parseXml(content);
-    auto images = root->getElementsByTagName("img");
+
+    // <img src="..." />
+    // <image xlink:href="..." />
+
+    String tagNames[]{ "img", "image" };
+    auto images = root->getElementsByTagNames(tagNames, _countof(tagNames));
 
     for (const auto& image : images) {
-        auto src = image->attr("src");
-        if (src.count == 0) continue;
-        collectImage(epub, resolveRelativePath(currentDirectory, src));
+        String imageUrl;
+        if (image->name == "img") {
+            imageUrl = image->attr("src");
+        } else if (image->name == "image") {
+            imageUrl = image->attr("xlink:href");
+        } else {
+            verify(false);
+        }
+
+        if (imageUrl.count == 0) continue;
+        collectImage(epub, resolveRelativePath(currentDirectory, imageUrl));
     }
-    int z = 1;
 }
 
 EPubItem* EPub::getItemById(const String& id) {
@@ -134,7 +146,7 @@ static String discoverContentRoot(EPub& epub) {
         if (rootFile->attr("media-type") == "application/oebps-package+xml") {
             auto fullPath = rootFile->attr("full-path");
             int slashIndex = indexOf(fullPath, '/');
-            epub.contentRootFolder = copyString(slashIndex == -1 ? fullPath : substring(fullPath, 0, slashIndex));
+            epub.contentRootFolder = copyString(slashIndex == -1 ? "" : substring(fullPath, 0, slashIndex));
             return fullPath;
         }
     }

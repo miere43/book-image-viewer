@@ -52,6 +52,9 @@ struct XmlElement : public XmlNode {
     Array<XmlElement*> getElementsByTagName(const String& name);
     void getElementsByTagName(const String& name, Array<XmlElement*>& result);
 
+    Array<XmlElement*> getElementsByTagNames(const String* names, size_t count);
+    void getElementsByTagNames(const String* names, size_t count, Array<XmlElement*>& result);
+
     void findAll(const String& key, Array<XmlElement*>& result) const;
     Array<XmlElement*> findElements(const String& name) const;
     XmlElement* element(const String& key) const;
