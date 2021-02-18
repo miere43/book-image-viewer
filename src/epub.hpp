@@ -1,7 +1,7 @@
 #pragma once
 #include "common.hpp"
-#include <vector>
 #include "miniz.h"
+#include "array.hpp"
 
 struct EPubItem {
 	String id;
@@ -12,9 +12,9 @@ struct EPubItem {
 struct EPub {
 	String fileName;
 	String contentRootFolder;
-	std::vector<EPubItem*> items;
-	std::vector<EPubItem*> linearItemOrder;
-	std::vector<String> images;
+	Array<EPubItem*> items;
+	Array<EPubItem*> linearItemOrder;
+	Array<String> images;
 	mz_zip_archive zip;
 
 	EPubItem* getItemById(const String& id);

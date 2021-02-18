@@ -58,7 +58,7 @@ String mprintf_valist(const char* format, va_list args) {
 
 String copyString(const String& str) {
     if (str.isEmpty()) return {};
-    auto chars = (char*)::operator new(str.count);
+    auto chars = new char[str.count];
     memcpy(chars, str.chars, str.count);
     return { chars, str.count };
 }

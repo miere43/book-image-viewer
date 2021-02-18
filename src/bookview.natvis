@@ -3,4 +3,16 @@
 	<Type Name="String">
 		<DisplayString>{chars,[count]s}</DisplayString>
 	</Type>
+
+	<Type Name="Array&lt;*&gt;">
+		<DisplayString>{{Count = {count}}}</DisplayString>
+		<Expand>
+			<Item Name="Count">count</Item>
+			<Item Name="Capacity">capacity</Item>
+			<ArrayItems>
+				<Size>count</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
 </AutoVisualizer>

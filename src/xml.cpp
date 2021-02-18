@@ -1,5 +1,6 @@
 #include "xml.hpp"
 #include "string.hpp"
+#include <stdlib.h> // _countof
 
 inline static bool isWhiteSpace(char c) {
     return c == ' ' || c == '\t';
@@ -263,7 +264,7 @@ XmlElement* parseElement(XmlParser& parser, const XmlToken& thisElementToken) {
     while (parser.next(&token)) {
         switch (token.type) {
             case XmlTokenType::Attribute: {
-                element->attributes.push_back(token.attribute);
+                element->attributes.push(token.attribute);
             } break;
             default: {
                 goto finishAttributes;
@@ -280,10 +281,10 @@ finishAttributes:
                 return element;
             }
             case XmlTokenType::StartElement: {
-                element->children.push_back(parseElement(parser, token));
+                element->children.push(parseElement(parser, token));
             } break;
             case XmlTokenType::Text: {
-                element->children.push_back(parseText(parser, token));
+                element->children.push(parseText(parser, token));
             } break;
             default: {
                 verify(false);
@@ -352,7 +353,7 @@ XmlElement* parseXml(const String& source) {
 }
 
 String XmlElement::attr(const String& key) const {
-    for (int i = 0; i < attributes.size(); ++i) {
+    for (int i = 0; i < attributes.count; ++i) {
         const auto& attr = attributes[i];
         if (attr.key == key) {
             return attr.value;
@@ -365,20 +366,20 @@ int XmlElement::attrInt(const String& key) const {
     return parseInt(attr(key));
 }
 
-std::vector<XmlElement*> XmlElement::getElementsByTagName(const String& name) {
-    std::vector<XmlElement*> results;
+Array<XmlElement*> XmlElement::getElementsByTagName(const String& name) {
+    Array<XmlElement*> results;
     getElementsByTagName(name, results);
     return results;
 }
 
-void XmlElement::getElementsByTagName(const String& name, std::vector<XmlElement*>& result) {
+void XmlElement::getElementsByTagName(const String& name, Array<XmlElement*>& result) {
     for (auto child : children) {
         if (child->type != XmlNodeType::Element) {
             continue;
         }
         auto* element = (XmlElement*)child;
         if (stringEqualsCaseInsensitive(element->name, name)) {
-            result.push_back(element);
+            result.push(element);
         }
         element->getElementsByTagName(name, result);
     }
@@ -388,20 +389,20 @@ bool XmlElement::attrBoolean(const String& key) const {
     return parseBoolean(attr(key));
 }
 
-void XmlElement::findAll(const String& key, std::vector<XmlElement*>& result) const {
+void XmlElement::findAll(const String& key, Array<XmlElement*>& result) const {
     for (auto& child : children) {
         auto element = (XmlElement*)child;
         if (element->type == XmlNodeType::Element && element->name == key) {
-            result.push_back(element);
+            result.push(element);
         }
     }
 }
 
-std::vector<XmlElement*> XmlElement::findElements(const String& name) const {
-    std::vector<XmlElement*> elements;
+Array<XmlElement*> XmlElement::findElements(const String& name) const {
+    Array<XmlElement*> elements;
     for (auto child : children) {
         if (child->type == XmlNodeType::Element && ((XmlElement*)child)->name == name) {
-            elements.push_back((XmlElement*)child);
+            elements.push((XmlElement*)child);
         }
     }
     return elements;
@@ -418,6 +419,6 @@ XmlElement* XmlElement::element(const String& key) const {
 }
 
 String XmlElement::text() const {
-    verify(children.size() == 1 && children.data()[0]->type == XmlNodeType::Text);
-    return ((XmlText*)children.data()[0])->text;
+    verify(children.count == 1 && children.data[0]->type == XmlNodeType::Text);
+    return ((XmlText*)children.data[0])->text;
 }

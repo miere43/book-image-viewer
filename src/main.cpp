@@ -6,6 +6,7 @@
 #include "common.hpp"
 #include "epub.hpp"
 #include "string.hpp"
+#include "array.hpp"
 
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "windowscodecs.lib")
@@ -25,7 +26,7 @@ static ID2D1Factory* d2d1Factory = 0;
 static IWICImagingFactory2* wicFactory = nullptr;
 static ID2D1HwndRenderTarget* hwndRenderTarget = 0;
 static EPub* currentEPub;
-static std::vector<Image> currentImages;
+static Array<Image> currentImages;
 static int currentImageIndex = 0;
 
 static void initWindow(HINSTANCE hInstance);
@@ -185,7 +186,7 @@ static void paintWindow() {
     R->BeginDraw();
     R->Clear({ 0, 0, 0, 1 });
 
-    if (currentImageIndex < currentImages.size()) {
+    if (currentImageIndex < currentImages.count) {
         auto& image = currentImages[currentImageIndex];
         if (!image.bitmap || image.clientWidth != clientWidth || image.clientHeight != clientHeight) {
             if (image.bitmap) image.bitmap->Release();
@@ -213,11 +214,11 @@ static void loadEPub(const String& fileName) {
     auto content = new EPub();
     content->parse(fileName);
 
-    std::vector<Image> images;
+    Array<Image> images;
     for (const auto& imagePath : content->images) {
         Image parsedImage;
         parsedImage.fileName = imagePath;
-        images.push_back(parsedImage);
+        images.push(parsedImage);
     }
 
     currentImageIndex = 0;
@@ -262,13 +263,13 @@ static T clamp(const T& value, const T& min, const T& max) {
 static void handleKeyboard(int key) {
     switch (key) {
         case VK_LEFT: {
-            currentImageIndex = clamp(currentImageIndex - 1, 0, (int)currentImages.size());
+            currentImageIndex = clamp(currentImageIndex - 1, 0, currentImages.count);
             redraw();
             updateTitle();
         } break;
 
         case VK_RIGHT: {
-            currentImageIndex = clamp(currentImageIndex + 1, 0, (int)currentImages.size());
+            currentImageIndex = clamp(currentImageIndex + 1, 0, currentImages.count);
             redraw();
             updateTitle();
         } break;
@@ -284,8 +285,8 @@ static void updateTitle() {
 
     if (currentEPub) {
         auto fileName = toUtf16(currentEPub->fileName, nullptr);
-        swprintf_s(buffer, L"Book Image Viewer - (%d/%d) - %s", currentImageIndex, (int)currentImages.size(), fileName);
-        delete fileName;
+        swprintf_s(buffer, L"Book Image Viewer - (%d/%d) - %s", currentImageIndex, currentImages.count, fileName);
+        delete[] fileName;
         SetWindowTextW(hwnd, buffer);
     } else {
         SetWindowTextW(hwnd, L"Book Image Viewer");

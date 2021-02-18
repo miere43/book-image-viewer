@@ -1,58 +1,59 @@
 #include "common.hpp"
 #include "epub.hpp"
-#include <stdio.h>
 #include "miniz.h"
 #include "xml.hpp"
 #include "string.hpp"
+#include "array.hpp"
 
 static String removeLastPathComponent(const String& path) {
 	int slashIndex = lastIndexOf(path, '/');
 	return slashIndex == -1 ? path : substring(path, 0, slashIndex);
 }
 
-static void splitPathIntoComponents(const String& path, std::vector<String>& components) {
+static void splitPathIntoComponents(const String& path, Array<String>& components) {
 	int lastComponentEndIndex = 0;
 	for (int i = 0; i <= path.count; ++i) {
 		char c = path[i];
 		if (c == '/' || i == path.count) {
 			int componentCharacterCount = i - lastComponentEndIndex;
 			if (componentCharacterCount > 0) {
-				components.push_back(substring(path, lastComponentEndIndex, componentCharacterCount));
+				components.push(substring(path, lastComponentEndIndex, componentCharacterCount));
 			}
 			lastComponentEndIndex = i + 1;
 		}
 	}
 }
 
-static String combinePath(const std::vector<String>& components) {
-	if (components.size() == 0) {
+static String combinePath(const Array<String>& components) {
+	if (components.count == 0) {
 		return copyString("");
 	}
-	int count = components.size() - 1;
+	int count = components.count - 1;
 	for (const auto& component : components) {
 		count += component.count;
 	}
 	auto memory = new char[count];
 	auto now = memory;
-	for (const auto& component : components) {
+	for (int i = 0; i < components.count; ++i) {
+		const auto& component = components[i];
 		memcpy(now, component.chars, component.count);
 		now += component.count;
-		*now++ = '/';
+		if (i != components.count - 1) *now++ = '/';
 	}
 	return { memory, count };
 }
 
 static String resolveRelativePath(const String& currentDirectory, const String& targetFilePath) {
-	std::vector<String> components;
+	Array<String> components;
 	splitPathIntoComponents(currentDirectory, components);
 	splitPathIntoComponents(targetFilePath, components);
 
-	for (int i = 0; i < components.size(); ++i) {
+	for (int i = 0; i < components.count; ++i) {
 		const auto& component = components[i];
 		if (component == "..") {
 			verify(i >= 1);
-			components.erase(components.begin() + i);
-			components.erase(components.begin() + (i - 1));
+			components.removeAt(i);
+			components.removeAt(i - 1);
 			i -= 2;
 		}
 	}
@@ -72,7 +73,7 @@ static void parseContent(EPub& epub, const String& content, const String& curren
 		parsedItem->id = item->attr("id");
 		parsedItem->href = resolveRelativePath(currentDirectory, item->attr("href"));
 		parsedItem->mediaType = item->attr("media-type");
-		epub.items.push_back(parsedItem);
+		epub.items.push(parsedItem);
 	}
 
 	auto spine = root->element("spine");
@@ -83,7 +84,7 @@ static void parseContent(EPub& epub, const String& content, const String& curren
 		auto idref = itemref->attr("idref");
 		auto item = epub.getItemById(idref);
 		verify(item);
-		epub.linearItemOrder.push_back(item);
+		epub.linearItemOrder.push(item);
 	}
 }
 
@@ -93,7 +94,7 @@ static void collectImage(EPub& epub, const String& src) {
 			return;
 		}
 	}
-	epub.images.push_back(src);
+	epub.images.push(src);
 }
 
 static void collectPageImages(EPub& epub, const String& content, const String& currentDirectory) {
@@ -167,13 +168,13 @@ String EPub::readFile(const String& fileName) {
 	size_t size;
 	void* data = mz_zip_reader_extract_file_to_heap(&zip, normalizedFileName, &size, 0);
 	verify(data);
-	delete normalizedFileName;
+	delete[] normalizedFileName;
 	return { (char*)data, (int)size };
 }
 
 void EPub::destroy() {
 	mz_zip_end(&zip);
-	items.clear();
-	linearItemOrder.clear();
-	images.clear();
+	items.destroy();
+	linearItemOrder.destroy();
+	images.destroy();
 }

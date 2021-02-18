@@ -15,7 +15,7 @@ struct String {
     char* chars;
     int count;
 
-    inline void destroy() { delete chars; chars = nullptr; count = 0; }
+    inline void destroy() { delete[] chars; chars = nullptr; count = 0; }
     inline bool isEmpty() const { return chars == nullptr || count <= 0; }
     inline char operator[](size_t i) const { return chars[i]; }
 

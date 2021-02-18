@@ -149,6 +149,7 @@
     <ClCompile Include="xml.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="array.hpp" />
     <ClInclude Include="common.hpp" />
     <ClInclude Include="epub.hpp" />
     <ClInclude Include="miniz.h" />

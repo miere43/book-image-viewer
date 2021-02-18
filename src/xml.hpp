@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include <vector>
+#include "array.hpp"
 
 enum class XmlTokenType {
     // <?xml ... ?>
@@ -42,18 +42,18 @@ struct XmlNode {
 
 struct XmlElement : public XmlNode {
     String name;
-    std::vector<XmlNode*> children;
-    std::vector<XmlAttribute> attributes;
+    Array<XmlNode*> children;
+    Array<XmlAttribute> attributes;
 
     String attr(const String& key) const;
     int attrInt(const String& key) const;
     bool attrBoolean(const String& key) const;
 
-    std::vector<XmlElement*> getElementsByTagName(const String& name);
-    void getElementsByTagName(const String& name, std::vector<XmlElement*>& result);
+    Array<XmlElement*> getElementsByTagName(const String& name);
+    void getElementsByTagName(const String& name, Array<XmlElement*>& result);
 
-    void findAll(const String& key, std::vector<XmlElement*>& result) const;
-    std::vector<XmlElement*> findElements(const String& name) const;
+    void findAll(const String& key, Array<XmlElement*>& result) const;
+    Array<XmlElement*> findElements(const String& name) const;
     XmlElement* element(const String& key) const;
     String text() const;
 };
